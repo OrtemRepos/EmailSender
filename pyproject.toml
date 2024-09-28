@@ -1,0 +1,21 @@
+[project]
+name = "emailsender"
+version = "0.1.0"
+description = "Add your description here"
+readme = "README.md"
+requires-python = ">=3.12"
+dependencies = [
+    "aiosmtplib>=3.0.2",
+    "faststream[kafka]>=0.5.25",
+    "jinja2>=3.1.4",
+    "orjson>=3.10.7",
+    "pydantic-settings>=2.5.2",
+    "pydantic[email]>=2.9.2",
+    "structlog>=24.4.0",
+    "uvicorn>=0.31.0",
+]
+
+[tool.uv]
+dev-dependencies = [
+    "faststream[cli]>=0.5.25",
+]

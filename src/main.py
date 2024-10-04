@@ -1,5 +1,6 @@
 from faststream.kafka import KafkaBroker
-from litestar import Litestar
+from litestar import Litestar, get, Response
+from litestar.response.base import ASGIResponse
 
 from src.schema import UserEmail
 from src.logging_config import logger
@@ -14,6 +15,18 @@ app = Litestar(
     on_startup=[broker.start],
     on_shutdown=[broker.close],
 )
+
+
+@get("/health", tags=["Server"], description="Health check", content_type="application/json")
+async def helth_check() -> dict | Response:
+    await logger.ainfo("Health check")
+    if await broker.ping(timeout=60):
+        return {"status": "ok"}
+    await logger.awarning("Broker is not available")
+    return Response(content="Broker is not available", status_code=500)
+
+
+app.register(helth_check)
 
 
 @broker.subscriber(

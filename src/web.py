@@ -1,55 +1,70 @@
 from aiosmtplib import SMTP
 
-from litestar import get, post, Response, status_codes, Router
+from litestar import get, post, Router, Response
 from litestar.openapi import OpenAPIConfig
 from litestar.openapi.plugins import ScalarRenderPlugin
+from litestar.openapi.spec.tag import Tag
 
-from faststream.asyncapi import get_asyncapi_html
 from faststream.asyncapi.schema import Schema
+from faststream.asyncapi import get_asyncapi_html
 from src.service import email_sender
 from src.schema import UserEmail
 from json import load
 
 
-@post("/reset-password")
-async def reset_password(email: UserEmail) -> Response:
+tags = [
+    Tag("Confirm-Email", description="Send email to confirm email"),
+    Tag("Reset-Password", description="Send email to reset password"),
+    Tag("Docs", description="AsyncAPI docs"),
+    Tag("Server", description="Server utils"),
+]
+
+
+@post("/reset-password", status_code=204, description="Send email to reset password", tags=["Reset-Password"])
+async def reset_password(email: UserEmail) -> None:
     async with SMTP(
         hostname=email_sender.host, port=int(email_sender.port), use_tls=True
     ) as session:
         await email_sender.send_email(
             email.email, email.token, "Reset Password", "reset_password.html", session
         )
-    return Response(content=None, status_code=status_codes.HTTP_204_NO_CONTENT)
 
 
-@post("/confirm-email")
-async def confirm_email(email: UserEmail) -> Response:
+@post("/confirm-email", status_code=204, description="Send email to confirm email", tags=["Confirm-Email"])
+async def confirm_email(email: UserEmail) -> None:
     async with SMTP(
         hostname=email_sender.host, port=int(email_sender.port), use_tls=True
     ) as session:
         await email_sender.send_email(
             email.email, email.token, "Confirm Email", "confirm_email.html", session
         )
-    return Response(content=None, status_code=status_codes.HTTP_204_NO_CONTENT)
 
 
-@post("/batch-reset-password")
-async def batch_reset_password(emails: list[UserEmail]) -> Response:
+@post(
+    "/batch-reset-password",
+    status_code=204,
+    description="Send batch email to reset password",
+    tags=["Reset-Password"],
+)
+async def batch_reset_password(emails: list[UserEmail]) -> None:
     await email_sender.send_email_batch(emails, "Reset Password", "reset_password.html")
-    return Response(content=None, status_code=status_codes.HTTP_204_NO_CONTENT)
 
 
-@post("/batch-confirm-email")
-async def batch_confirm_email(emails: list[UserEmail]) -> Response:
+@post("/batch-confirm-email", description="Send batch email to confirm email", status_code=204, tags=["Confirm-Email"])
+async def batch_confirm_email(
+    emails: list[UserEmail]
+) -> None:
     await email_sender.send_email_batch(emails, "Confirm Email", "confirm_email.html")
-    return Response(content=None, status_code=status_codes.HTTP_204_NO_CONTENT)
 
 
 with open("./asyncapi.json", "r") as f:
     schema = load(f)
 
 
-@get("/asyncapi")
+@get(
+    "/asyncapi",
+    description="Get AsyncAPI schema",
+)
 async def asyncapi() -> Response:
     return Response(content=get_asyncapi_html(Schema(**schema)), media_type="text/html")
 
@@ -64,7 +79,8 @@ api = Router(
     ],
 )
 
-docs = Router("/docs", route_handlers=[asyncapi])
+docs = Router("/docs", route_handlers=[asyncapi],
+              tags=["Docs"])
 
 openapi_config = OpenAPIConfig(
     title="EmailSedner REST API",
@@ -72,4 +88,5 @@ openapi_config = OpenAPIConfig(
     description="Send emails to users",
     path="/docs",
     render_plugins=[ScalarRenderPlugin()],
+    tags=tags,
 )

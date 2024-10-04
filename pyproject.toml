@@ -8,6 +8,7 @@ dependencies = [
     "aiosmtplib>=3.0.2",
     "asyncapi>=0.14.1",
     "faststream[kafka]>=0.5.25",
+    "httptools>=0.6.1",
     "jinja2>=3.1.4",
     "litestar>=2.12.1",
     "orjson>=3.10.7",
@@ -15,9 +16,11 @@ dependencies = [
     "pydantic[email]>=2.9.2",
     "structlog>=24.4.0",
     "uvicorn>=0.31.0",
+    "uvloop>=0.20.0",
 ]
 
 [tool.uv]
 dev-dependencies = [
     "faststream[cli]>=0.5.25",
+    "rich>=13.8.1",
 ]

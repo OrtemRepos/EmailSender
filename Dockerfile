@@ -19,4 +19,4 @@ RUN uv sync
 
 EXPOSE 8000
 
-ENTRYPOINT uv run faststream run src.main:app
+CMD ["uv", "run", "src.main:app", "--host", "0.0.0.0", "--port", "8000"]

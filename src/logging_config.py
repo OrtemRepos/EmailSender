@@ -1,6 +1,13 @@
 import sys
 import structlog
 
+try:
+    from rich.traceback import install
+
+    install()
+except ImportError:
+    pass
+
 from faststream import context
 
 

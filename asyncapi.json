@@ -1,0 +1,118 @@
+{
+  "asyncapi": "2.6.0",
+  "defaultContentType": "application/json",
+  "info": {
+    "title": "EmailSender API",
+    "version": "0.1.0",
+    "description": "Send emails to users",
+    "contact": {
+      "name": "Sadykov Artem",
+      "url": "https://github.com/OrtemRepos",
+      "email": "ortem622@gmail.com"
+    },
+    "license": {
+      "name": "MIT",
+      "url": "https://opensource.org/licenses/MIT"
+    }
+  },
+  "servers": {
+    "development": {
+      "url": "localhost:9092",
+      "protocol": "kafka",
+      "protocolVersion": "auto"
+    }
+  },
+  "channels": {
+    "email_confirm:ConfirmationEmail": {
+      "description": "Send email to confirm email",
+      "servers": [
+        "development"
+      ],
+      "bindings": {
+        "kafka": {
+          "topic": "email_confirm",
+          "bindingVersion": "0.4.0"
+        }
+      },
+      "subscribe": {
+        "message": {
+          "$ref": "#/components/messages/email_confirm:ConfirmationEmail:Message"
+        }
+      }
+    },
+    "forgot_password:ForgotPassword": {
+      "description": "Send email to reset password",
+      "servers": [
+        "development"
+      ],
+      "bindings": {
+        "kafka": {
+          "topic": "forgot_password",
+          "bindingVersion": "0.4.0"
+        }
+      },
+      "subscribe": {
+        "message": {
+          "$ref": "#/components/messages/forgot_password:ForgotPassword:Message"
+        }
+      }
+    }
+  },
+  "components": {
+    "messages": {
+      "email_confirm:ConfirmationEmail:Message": {
+        "title": "email_confirm:ConfirmationEmail:Message",
+        "correlationId": {
+          "location": "$message.header#/correlation_id"
+        },
+        "payload": {
+          "$ref": "#/components/schemas/ConfirmationEmail:Message:Payload"
+        }
+      },
+      "forgot_password:ForgotPassword:Message": {
+        "title": "forgot_password:ForgotPassword:Message",
+        "correlationId": {
+          "location": "$message.header#/correlation_id"
+        },
+        "payload": {
+          "$ref": "#/components/schemas/ForgotPassword:Message:Payload"
+        }
+      }
+    },
+    "schemas": {
+      "UserEmail": {
+        "properties": {
+          "email": {
+            "format": "email",
+            "title": "Email",
+            "type": "string"
+          },
+          "token": {
+            "title": "Token",
+            "type": "string"
+          }
+        },
+        "required": [
+          "email",
+          "token"
+        ],
+        "title": "UserEmail",
+        "type": "object"
+      },
+      "ConfirmationEmail:Message:Payload": {
+        "items": {
+          "$ref": "#/components/schemas/UserEmail"
+        },
+        "title": "ConfirmationEmail:Message:Payload",
+        "type": "array"
+      },
+      "ForgotPassword:Message:Payload": {
+        "items": {
+          "$ref": "#/components/schemas/UserEmail"
+        },
+        "title": "ForgotPassword:Message:Payload",
+        "type": "array"
+      }
+    }
+  }
+}
